@@ -59,25 +59,29 @@ app.use('/api', (req, res, next) => {
 
 app.use('/api', formRoutes)
 
-const server = app.listen(port, host, () => {
-  console.log(`Server running at http://${host}:${port}`)
-})
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const server = app.listen(port, host, () => {
+    console.log(`Server running at http://${host}:${port}`)
+  })
 
-server.on('error', (error) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Server startup failed: port ${port} is already in use.`)
-    return
-  }
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Server startup failed: port ${port} is already in use.`)
+      return
+    }
 
-  if (error.code === 'EPERM') {
-    console.error(`Server startup failed: permission denied while binding to ${host}:${port}.`)
-    return
-  }
+    if (error.code === 'EPERM') {
+      console.error(`Server startup failed: permission denied while binding to ${host}:${port}.`)
+      return
+    }
 
-  console.error('Server startup failed:', error.message)
-})
+    console.error('Server startup failed:', error.message)
+  })
+}
 
 connectDb().catch((error) => {
   console.error('Database connection failed:', error.message)
   console.error('The API will stay up, but form routes will return 503 until MongoDB connects successfully.')
 })
+
+export default app

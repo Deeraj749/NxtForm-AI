@@ -18,9 +18,10 @@ app.use(
   cors({
     origin(origin, callback) {
       // Allow requests with no origin, origins in the configured allowed list,
-      // or any local address (localhost/127.0.0.1) on any port.
+      // local address (localhost/127.0.0.1) on any port, or any vercel.app subdomain.
       const isLocalhost = origin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
-      if (!origin || allowedOrigins.has(origin) || isLocalhost) {
+      const isVercel = origin && /^https?:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/.test(origin)
+      if (!origin || allowedOrigins.has(origin) || isLocalhost || isVercel) {
         return callback(null, true)
       }
 
@@ -30,12 +31,20 @@ app.use(
 )
 app.use(express.json())
 
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'NxtForm AI API is running smoothly!',
+    health: '/api/health'
+  })
+})
+
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     database: isDbReady() ? 'connected' : 'disconnected'
   })
 })
+
 
 app.use('/api/auth', authRoutes)
 

@@ -2,6 +2,10 @@ const resolveApiBase = () => {
   const configuredBase = import.meta.env.VITE_API_BASE_URL
 
   if (!configuredBase) {
+    if (window.location.hostname.endsWith('.vercel.app')) {
+      const serverHost = window.location.hostname.replace('-client.vercel.app', '-server.vercel.app')
+      return `https://${serverHost}/api`
+    }
     return `${window.location.protocol}//${window.location.hostname}:5000/api`
   }
 
